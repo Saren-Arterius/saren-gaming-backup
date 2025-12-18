@@ -5,6 +5,7 @@ import { observer } from 'mobx-react';
 import { Checkbox, DButton, ProgressBar } from './components';
 import { store } from './store';
 import { controller } from './controller';
+import { startServer } from './server';
 
 console.log(process.version);
 
@@ -117,6 +118,7 @@ class Example extends Component {
 
   componentDidMount() {
     controller.checkProcessLoop();
+    startServer();
   }
 
   render() {
