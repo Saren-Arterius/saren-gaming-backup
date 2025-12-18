@@ -1,0 +1,251 @@
+diff --git a/node_modules/node-qt-napi/src/QtGui/qplaintextedit.cpp b/node_modules/node-qt-napi/src/QtGui/qplaintextedit.cpp
+index 0dec332..be7b221 100644
+--- a/node_modules/node-qt-napi/src/QtGui/qplaintextedit.cpp
++++ b/node_modules/node-qt-napi/src/QtGui/qplaintextedit.cpp
+@@ -1,79 +1,78 @@
+ #include "qplaintextedit.hpp"
++#include <QScrollBar>
+ 
+ Napi::FunctionReference QPlainTextEditWrap::constructor;
+ 
+ QWIDGET_IMPL_FUNCS(QPlainTextEdit)
+ 
+-void SlotHandlerPlainTextEdit::textChangedSlot()
+-{
+-    Napi::Env env = element->textChangedCallback_.Env();
+-    element->textChangedCallback_.Call({Napi::String::New(env, element->q_->toPlainText().toStdString())});
++void SlotHandlerPlainTextEdit::textChangedSlot() {
++  Napi::Env env = element->textChangedCallback_.Env();
++  element->textChangedCallback_.Call(
++      {Napi::String::New(env, element->q_->toPlainText().toStdString())});
+ }
+ 
+-Napi::Object QPlainTextEditWrap::Init(Napi::Env env, Napi::Object exports)
+-{
+-    Napi::HandleScope scope(env);
+-    // clang-format off
++Napi::Object QPlainTextEditWrap::Init(Napi::Env env, Napi::Object exports) {
++  Napi::HandleScope scope(env);
++  // clang-format off
+     Napi::Function func = DefineClass(env, "QPlainTextEdit", {
+         InstanceMethod("setText", &QPlainTextEditWrap::setText),
+         InstanceMethod("text", &QPlainTextEditWrap::text),
++        InstanceMethod("scrollToBottom", &QPlainTextEditWrap::scrollToBottom),
+         InstanceMethod("textChangedEvent", &QPlainTextEditWrap::textChangedEvent),
+         QWIDGET_JS_DEFINES(QPlainTextEditWrap)
+     });
+-    // clang-format on
++  // clang-format on
+ 
+-    constructor = Napi::Persistent(func);
+-    constructor.SuppressDestruct();
++  constructor = Napi::Persistent(func);
++  constructor.SuppressDestruct();
+ 
+-    exports.Set("QPlainTextEdit", func);
+-    return exports;
++  exports.Set("QPlainTextEdit", func);
++  return exports;
+ }
+ 
+-QPlainTextEditWrap::QPlainTextEditWrap(const Napi::CallbackInfo &info) : Napi::ObjectWrap<QPlainTextEditWrap>(info), slotHandler(this)
+-{
+-    Napi::Env env = info.Env();
+-    Napi::HandleScope scope(env);
+-
+-    if (info.Length() > 0)
+-    {
+-        QWidget *parent = unwrap(info[0]);
+-        q_ = new QPlainTextEditImpl(parent, env);
+-    }
+-    else
+-    {
+-        QPlainTextEditImpl *q_parent = 0;
+-        q_ = new QPlainTextEditImpl(q_parent, env);
+-    }
++QPlainTextEditWrap::QPlainTextEditWrap(const Napi::CallbackInfo &info)
++    : Napi::ObjectWrap<QPlainTextEditWrap>(info), slotHandler(this) {
++  Napi::Env env = info.Env();
++  Napi::HandleScope scope(env);
++
++  if (info.Length() > 0) {
++    QWidget *parent = unwrap(info[0]);
++    q_ = new QPlainTextEditImpl(parent, env);
++  } else {
++    QPlainTextEditImpl *q_parent = 0;
++    q_ = new QPlainTextEditImpl(q_parent, env);
++  }
+ }
+ 
+-QPlainTextEditWrap::~QPlainTextEditWrap()
+-{
+-    q_ = NULL;
+-}
++QPlainTextEditWrap::~QPlainTextEditWrap() { q_ = NULL; }
+ 
+-Napi::Value QPlainTextEditWrap::setText(const Napi::CallbackInfo &info)
+-{
+-    q_->setPlainText(QString::fromStdString(info[0].ToString().Utf8Value()));
+-    return Napi::Value();
++Napi::Value QPlainTextEditWrap::setText(const Napi::CallbackInfo &info) {
++  q_->setPlainText(QString::fromStdString(info[0].ToString().Utf8Value()));
++  return Napi::Value();
+ }
+ 
+-Napi::Value QPlainTextEditWrap::text(const Napi::CallbackInfo &info)
+-{
+-    Napi::Env env = info.Env();
+-    Napi::HandleScope scope(env);
++Napi::Value QPlainTextEditWrap::text(const Napi::CallbackInfo &info) {
++  Napi::Env env = info.Env();
++  Napi::HandleScope scope(env);
++
++  return Napi::String::New(env, q_->toPlainText().toStdString());
++}
+ 
+-    return Napi::String::New(env, q_->toPlainText().toStdString());
++Napi::Value QPlainTextEditWrap::scrollToBottom(const Napi::CallbackInfo &info) {
++  q_->verticalScrollBar()->setValue(q_->verticalScrollBar()->maximum());
++  return Napi::Value();
+ }
+ 
+-Napi::Value QPlainTextEditWrap::textChangedEvent(const Napi::CallbackInfo &info)
+-{
+-    Napi::Env env = info.Env();
+-    Napi::HandleScope scope(env);
++Napi::Value
++QPlainTextEditWrap::textChangedEvent(const Napi::CallbackInfo &info) {
++  Napi::Env env = info.Env();
++  Napi::HandleScope scope(env);
+ 
+-    textChangedCallback_ = Napi::Persistent(info[0].As<Napi::Function>());
+-    QObject::connect(q_, SIGNAL(textChanged()), &slotHandler, SLOT(textChangedSlot()));
++  textChangedCallback_ = Napi::Persistent(info[0].As<Napi::Function>());
++  QObject::connect(q_, SIGNAL(textChanged()), &slotHandler,
++                   SLOT(textChangedSlot()));
+ 
+-    return Napi::Value();
++  return Napi::Value();
+ }
+ 
+ #include "qplaintextedit.moc"
+diff --git a/node_modules/node-qt-napi/src/QtGui/qplaintextedit.hpp b/node_modules/node-qt-napi/src/QtGui/qplaintextedit.hpp
+index 2fbc3e5..7177d20 100644
+--- a/node_modules/node-qt-napi/src/QtGui/qplaintextedit.hpp
++++ b/node_modules/node-qt-napi/src/QtGui/qplaintextedit.hpp
+@@ -1,32 +1,30 @@
+ #ifndef QPLAINTEXTEDITWRAP_H
+ #define QPLAINTEXTEDITWRAP_H
+-#include <QPlainTextEdit>
+-#include <QObject>
+-#include <QString>
+-#include <napi.h>
++#include "../utils/unwrapper.hpp"
+ #include "qwidget.hpp"
+ #include "qwidget_macros.hpp"
+-#include "../utils/unwrapper.hpp"
++#include <QObject>
++#include <QPlainTextEdit>
++#include <QString>
+ #include <iostream>
++#include <napi.h>
+ 
+ QWIDGET_IMPL_DEF(QPlainTextEdit)
+ 
+ class QPlainTextEditWrap;
+-class SlotHandlerPlainTextEdit : public QObject
+-{
++class SlotHandlerPlainTextEdit : public QObject {
+ 
+   Q_OBJECT
+ 
+ public:
+-  SlotHandlerPlainTextEdit(QPlainTextEditWrap *element) : element(element){};
++  SlotHandlerPlainTextEdit(QPlainTextEditWrap *element) : element(element) {};
+   QPlainTextEditWrap *element;
+ 
+ public slots:
+   void textChangedSlot();
+ };
+ 
+-class QPlainTextEditWrap : public Napi::ObjectWrap<QPlainTextEditWrap>
+-{
++class QPlainTextEditWrap : public Napi::ObjectWrap<QPlainTextEditWrap> {
+ public:
+   static Napi::Object Init(Napi::Env env, Napi::Object exports);
+ 
+@@ -41,6 +39,7 @@ private:
+ 
+   Napi::Value setText(const Napi::CallbackInfo &info);
+   Napi::Value text(const Napi::CallbackInfo &info);
++  Napi::Value scrollToBottom(const Napi::CallbackInfo &info);
+   Napi::Value textChangedEvent(const Napi::CallbackInfo &info);
+ 
+   SlotHandlerPlainTextEdit slotHandler;
+diff --git a/node_modules/node-qt-napi/src/QtGui/qplaintextedit.moc b/node_modules/node-qt-napi/src/QtGui/qplaintextedit.moc
+index 23ac29d..0a2f35d 100644
+--- a/node_modules/node-qt-napi/src/QtGui/qplaintextedit.moc
++++ b/node_modules/node-qt-napi/src/QtGui/qplaintextedit.moc
+@@ -1,18 +1,19 @@
+ /****************************************************************************
+ ** Meta object code from reading C++ file 'qplaintextedit.hpp'
+ **
+-** Created by: The Qt Meta Object Compiler version 67 (Qt 5.9.5)
++** Created by: The Qt Meta Object Compiler version 67 (Qt 5.15.18)
+ **
+ ** WARNING! All changes made in this file will be lost!
+ *****************************************************************************/
+ 
++#include <memory>
+ #include "qplaintextedit.hpp"
+ #include <QtCore/qbytearray.h>
+ #include <QtCore/qmetatype.h>
+ #if !defined(Q_MOC_OUTPUT_REVISION)
+ #error "The header file 'qplaintextedit.hpp' doesn't include <QObject>."
+ #elif Q_MOC_OUTPUT_REVISION != 67
+-#error "This file was generated using the moc from 5.9.5. It"
++#error "This file was generated using the moc from 5.15.18. It"
+ #error "cannot be used with the include files from this version of Qt."
+ #error "(The moc has changed too much.)"
+ #endif
+@@ -44,7 +45,7 @@ QT_MOC_LITERAL(2, 41, 0) // ""
+ static const uint qt_meta_data_SlotHandlerPlainTextEdit[] = {
+ 
+  // content:
+-       7,       // revision
++       8,       // revision
+        0,       // classname
+        0,    0, // classinfo
+        1,   14, // methods
+@@ -66,20 +67,24 @@ static const uint qt_meta_data_SlotHandlerPlainTextEdit[] = {
+ void SlotHandlerPlainTextEdit::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
+ {
+     if (_c == QMetaObject::InvokeMetaMethod) {
+-        SlotHandlerPlainTextEdit *_t = static_cast<SlotHandlerPlainTextEdit *>(_o);
+-        Q_UNUSED(_t)
++        auto *_t = static_cast<SlotHandlerPlainTextEdit *>(_o);
++        (void)_t;
+         switch (_id) {
+         case 0: _t->textChangedSlot(); break;
+         default: ;
+         }
+     }
+-    Q_UNUSED(_a);
++    (void)_a;
+ }
+ 
+-const QMetaObject SlotHandlerPlainTextEdit::staticMetaObject = {
+-    { &QObject::staticMetaObject, qt_meta_stringdata_SlotHandlerPlainTextEdit.data,
+-      qt_meta_data_SlotHandlerPlainTextEdit,  qt_static_metacall, nullptr, nullptr}
+-};
++QT_INIT_METAOBJECT const QMetaObject SlotHandlerPlainTextEdit::staticMetaObject = { {
++    QMetaObject::SuperData::link<QObject::staticMetaObject>(),
++    qt_meta_stringdata_SlotHandlerPlainTextEdit.data,
++    qt_meta_data_SlotHandlerPlainTextEdit,
++    qt_static_metacall,
++    nullptr,
++    nullptr
++} };
+ 
+ 
+ const QMetaObject *SlotHandlerPlainTextEdit::metaObject() const

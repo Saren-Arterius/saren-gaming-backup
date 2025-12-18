@@ -1,11 +1,16 @@
 diff --git a/node_modules/proton-native/bin/backends/qt.js b/node_modules/proton-native/bin/backends/qt.js
-index 3e42d75..7acfefa 100644
+index 3e42d75..107b772 100644
 --- a/node_modules/proton-native/bin/backends/qt.js
 +++ b/node_modules/proton-native/bin/backends/qt.js
-@@ -198,6 +198,13 @@ var TextInputElement = /** @class */ (function (_super) {
+@@ -198,6 +198,18 @@ var TextInputElement = /** @class */ (function (_super) {
      TextInputElement.prototype.setText = function (text) {
          this.element.setText(text);
      };
++    TextInputElement.prototype.scrollToBottom = function () {
++        if (this.element.scrollToBottom) {
++            this.element.scrollToBottom();
++        }
++    };
 +    TextInputElement.prototype.setReadOnly = function (readOnly) {
 +        if (readOnly) {
 +            this.element.setFocusPolicy(0); // Qt::NoFocus
@@ -17,7 +22,7 @@ index 3e42d75..7acfefa 100644
  }(BaseElement));
  exports.TextInputElement = TextInputElement;
 diff --git a/node_modules/proton-native/bin/components/TextInput.js b/node_modules/proton-native/bin/components/TextInput.js
-index 106caeb..269b74a 100644
+index 106caeb..c7b31ef 100644
 --- a/node_modules/proton-native/bin/components/TextInput.js
 +++ b/node_modules/proton-native/bin/components/TextInput.js
 @@ -1,6 +1,6 @@
@@ -28,13 +33,14 @@ index 106caeb..269b74a 100644
          for (var s, i = 1, n = arguments.length; i < n; i++) {
              s = arguments[i];
              for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-@@ -22,13 +22,15 @@ exports.default = (function (p) {
+@@ -22,13 +22,17 @@ exports.default = (function (p) {
          style: PropTypes.object,
          onChangeText: PropTypes.func,
          value: PropTypes.string,
 -        multiline: PropTypes.bool
 +        multiline: PropTypes.bool,
-+        readOnly: PropTypes.bool
++        readOnly: PropTypes.bool,
++        autoScrollToBottom: PropTypes.bool
      };
      var defaultProps = {
          style: {},
@@ -42,14 +48,18 @@ index 106caeb..269b74a 100644
          value: "",
 -        multiline: false
 +        multiline: false,
-+        readOnly: false
++        readOnly: false,
++        autoScrollToBottom: false
      };
      var TextInputElement = index_1.getBackend()["TextInputElement"];
      var element = new TextInputElement(p.multiline);
-@@ -64,9 +66,14 @@ exports.default = (function (p) {
+@@ -64,9 +68,17 @@ exports.default = (function (p) {
          },
          value: function (value) {
              element.setText(value);
++            if (p.autoScrollToBottom) {
++                element.scrollToBottom();
++            }
 +        },
 +        readOnly: function (readOnly) {
 +            element.setReadOnly(readOnly);

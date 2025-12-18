@@ -93,6 +93,7 @@ const LogSection = observer(() => {
       <TextInput
         multiline
         readOnly
+        autoScrollToBottom
         value={outputString}
         style={{
           fontSize: 13,
