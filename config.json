@@ -1,0 +1,41 @@
+{
+    "hostname_pattern": "saren-gaming",
+    "backup_mount": "/mnt/backup",
+    "min_storage_size_tb": 20,
+    "tasks": [
+        {
+            "name": "Local",
+            "config": "root",
+            "dest_pattern": "/mnt/backup/baksnapper/{hostname}",
+            "type": "push",
+            "all": true,
+            "link": true
+        },
+        {
+            "name": "WTAKO - root",
+            "config": "root",
+            "dest": "wtako-baksnapper:/mnt/backup/baksnapper/WTAKO",
+            "type": "pull",
+            "all": true,
+            "prune": true
+        },
+        {
+            "name": "WTAKO - storage",
+            "config": "storage",
+            "dest": "wtako-baksnapper:/mnt/backup/baksnapper/WTAKO",
+            "type": "pull",
+            "all": true,
+            "prune": true
+        },
+        {
+            "name": "saren-yoga7 - root",
+            "config": "root",
+            "dest": "yoga7-baksnapper:/mnt/backup/baksnapper/saren-yoga7",
+            "type": "pull",
+            "all": true
+        }
+    ],
+    "cleanup_paths": [
+        "/mnt/backup/baksnapper"
+    ]
+}
