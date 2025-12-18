@@ -1,6 +1,6 @@
 # Saren Gaming Backup
 
-A backup utility for pulling btrfs snapshots from all devices I own.
+A backup utility for pulling btrfs snapshots from all devices I own into my 22TB HDD connected to my gaming PC.
 
 ## Setup
 
