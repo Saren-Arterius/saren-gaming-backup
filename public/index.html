@@ -130,7 +130,14 @@
                     "%)";
                 document.getElementById("task-fill").style.width = taskPercent + "%";
 
-                document.getElementById("logs").innerText = data.lastLogs.join("\n");
+                const logsDiv = document.getElementById("logs");
+                const isAtBottom = logsDiv.scrollHeight - logsDiv.clientHeight <= logsDiv.scrollTop + 1;
+
+                logsDiv.innerText = data.lastLogs.join("\n");
+
+                if (isAtBottom) {
+                    logsDiv.scrollTop = logsDiv.scrollHeight;
+                }
             } catch (e) {
                 console.error("Failed to fetch progress", e);
             }

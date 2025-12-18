@@ -1,6 +1,6 @@
 # Saren Gaming Backup
 
-A backup utility for gaming data.
+A backup utility for pulling btrfs snapshots from all devices I own.
 
 ## Setup
 
