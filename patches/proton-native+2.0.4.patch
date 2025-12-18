@@ -1,0 +1,13 @@
+diff --git a/node_modules/proton-native/bin/utils/convertStyleSheet.js b/node_modules/proton-native/bin/utils/convertStyleSheet.js
+index 155cc81..a155a0c 100644
+--- a/node_modules/proton-native/bin/utils/convertStyleSheet.js
++++ b/node_modules/proton-native/bin/utils/convertStyleSheet.js
+@@ -38,7 +38,7 @@ var excluded = [
+ ];
+ var convertToPx = ["fontSize"];
+ var convertStyleSheet = function (style) {
+-    return Object.entries(style).reduce(function (styleString, _a) {
++    return Object.entries(style || {}).reduce(function (styleString, _a) {
+         var propName = _a[0], propValue = _a[1];
+         if (excluded.includes(propName)) {
+             return styleString;
